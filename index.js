@@ -10,7 +10,6 @@ app.use(cors());
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.0dt9tdk.mongodb.net/?retryWrites=true&w=majority`;
-// console.log(uri);
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -50,41 +49,19 @@ async function run() {
       }
     });
 
+    app.get("/user/:email", async(req,res) =>{
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await coffeeCollection.find(query).toArray();
+      console.log(result);
+      res.send(result);
+    })
+
     // get items by id
-    app.get("/coffee/:id", async (req, res) => {
+    app.get("/user/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await coffeeCollection.findOne(query);
-      res.send(result);
-    });
-
-    // update an date
-    app.put("/coffee/:id", async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const options = { upsert: true };
-      const updateCoffee = req.body;
-
-      const coffee = {
-        $set: {
-          name: updateCoffee.name,
-          quantity: updateCoffee.quantity,
-          supplier: updateCoffee.supplier,
-          test: updateCoffee.test,
-          category: updateCoffee.category,
-          details: updateCoffee.details,
-          photo: updateCoffee.photo,
-        },
-      };
-      const result = await coffeeCollection.updateOne(filter, coffee, options);
-      res.send(result);
-    });
-
-    // delete a items
-    app.delete("/coffee/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await coffeeCollection.deleteOne(query);
       res.send(result);
     });
 
