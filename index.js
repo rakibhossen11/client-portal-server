@@ -26,6 +26,7 @@ async function run() {
     await client.connect();
 
     const coffeeCollection = client.db("clientDB").collection("user");
+    const serviceCollection = client.db("clientDB").collection("services");
 
     // get items
     app.get("/user", async (req, res) => {
@@ -42,6 +43,7 @@ async function run() {
       let user = await coffeeCollection.findOne({ email: email });
       console.log(user);
       if (user) {
+        res.send("Already exist");
         console.log("Already exist");
       } else {
         const result = await coffeeCollection.insertOne(cursor);
@@ -52,6 +54,7 @@ async function run() {
     app.get("/user/:email", async(req,res) =>{
       const email = req.params.email;
       const query = { email: email };
+      console.log(query);
       const result = await coffeeCollection.find(query).toArray();
       console.log(result);
       res.send(result);
@@ -64,6 +67,28 @@ async function run() {
       const result = await coffeeCollection.findOne(query);
       res.send(result);
     });
+
+    // service related api start
+    app.get("/services", async(req,res) =>{
+      const cursor = serviceCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+
+    app.get("/services/:id", async(req,res) =>{
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await serviceCollection.findOne(query);
+      res.send(result);
+    })
+
+    app.post("/services", async(req,res) =>{
+      const cursor = req.body;
+      const result = await serviceCollection.insertOne(cursor);
+      res.send(result);
+    })
+    // service related api end
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
